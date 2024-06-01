@@ -1,0 +1,17 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "local>USA-RedDragon/renovate-configs"
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "(^|/)\\.github\\/workflows\\/go\\.yaml$"
+            ],
+            "matchStrings": [
+                "# renovate: k8s: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\n\\s+- (?<currentValue>v\\d+\\.\\d+\\.\\d+)"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver-coerced{{/if}}"
+        }
+    ]
+}
