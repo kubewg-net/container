@@ -34,11 +34,11 @@ jobs:
         # Supported versions at https://kubernetes.io/releases/
         version:
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.27.13
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.28.9
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.29.4
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
         - v1.30.0
     permissions:
@@ -85,11 +85,11 @@ jobs:
         # Supported versions at https://kubernetes.io/releases/
         version:
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.27.13
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.28.9
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.29.4
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
         - v1.30.0
     permissions:
@@ -138,11 +138,11 @@ jobs:
         # Supported versions at https://kubernetes.io/releases/
         version:
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.27.13
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.28.9
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
-        - v1.29.4
+        - v1.30.0
         # renovate: k8s: datasource=docker depName=kindest/node
         - v1.30.0
     permissions:
