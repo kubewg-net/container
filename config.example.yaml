@@ -1,0 +1,15 @@
+tracing:
+  enabled: false
+  otlp_endpoint: ''
+
+pprof:
+  enabled: false
+  ipv4_host: '127.0.0.1' # localhost
+  ipv6_host: '::1' # localhost
+  port: 6060
+
+metrics:
+  enabled: false
+  ipv4_host: '127.0.0.1' # localhost
+  ipv6_host: '::1' # localhost
+  port: 8081
