@@ -1,0 +1,253 @@
+name: Go Checks
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          skip-cache: true
+          # Show only new issues if it's a pull request. The default value is `false`.
+          only-new-issues: true
+  test-e2e:
+    name: test-e2e
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported versions at https://kubernetes.io/releases/
+        version:
+        - v1.27.13 # EOL 2024-06-28
+        - v1.28.9 # EOL 2024-10-28
+        - v1.29.4 # EOL 2025-02-28
+        - v1.30.0 # EOL 2025-06-28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          node_image: kindest/node:${{ matrix.version }}
+          cluster_name: kind
+      - name: test-e2e
+        run: exit 1
+
+  benchmark-tests:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported versions at https://kubernetes.io/releases/
+        version:
+        - v1.27.13 # EOL 2024-06-28
+        - v1.28.9 # EOL 2024-10-28
+        - v1.29.4 # EOL 2025-02-28
+        - v1.30.0 # EOL 2025-06-28
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          node_image: kindest/node:${{ matrix.version }}
+          cluster_name: kind
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Copy built frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend
+          path: internal/http/frontend/dist
+
+      - run: go generate ./...
+
+      - run: make benchmark
+
+  benchmark-results:
+    name: benchmark-results
+    if: always()
+    runs-on: ubuntu-22.04
+    needs: [benchmark-tests]
+    steps:
+      - run: |
+          result="${{ needs.benchmark-tests.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All benchmark tests passed"
+          else
+            echo "One or more benchmark tests failed" >&2
+            exit 1
+          fi
+
+  race-tests:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported versions at https://kubernetes.io/releases/
+        version:
+        - v1.27.13 # EOL 2024-06-28
+        - v1.28.9 # EOL 2024-10-28
+        - v1.29.4 # EOL 2025-02-28
+        - v1.30.0 # EOL 2025-06-28
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          node_image: kindest/node:${{ matrix.version }}
+          cluster_name: kind
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Copy built frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend
+          path: internal/http/frontend/dist
+
+      - run: go generate ./...
+
+      - name: Race tests
+        run: |
+          go test ./... -race
+
+  race-results:
+    name: race-results
+    if: always()
+    runs-on: ubuntu-22.04
+    needs: [race-tests]
+    steps:
+      - run: |
+          result="${{ needs.race-tests.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All race tests passed"
+          else
+            echo "One or more race tests failed" >&2
+            exit 1
+          fi
+
+  unit-tests:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported versions at https://kubernetes.io/releases/
+        version:
+        - v1.27.13 # EOL 2024-06-28
+        - v1.28.9 # EOL 2024-10-28
+        - v1.29.4 # EOL 2025-02-28
+        - v1.30.0 # EOL 2025-06-28
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          node_image: kindest/node:${{ matrix.version }}
+          cluster_name: kind
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Copy built frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend
+          path: internal/http/frontend/dist
+
+      - run: go generate ./...
+
+      - name: Unit tests
+        run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          go install github.com/vakenbolt/go-test-report@latest
+          env CGO_ENABLED=0 go test -v ./... 2>&1 > out.txt || true
+          env CGO_ENABLED=0 go test -v ./... -json 2>&1 > json-out.txt || true
+          cat out.txt | go-junit-report -out report.xml -iocopy
+          cat json-out.txt | go-test-report -o report.html
+
+      - name: Publish Test Report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: "report.xml"
+          require_tests: true
+          check_retries: true
+          detailed_summary: true
+          fail_on_failure: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: Unit Tests
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report-xml
+          path: report.xml
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report-html
+          path: report.html
+          if-no-files-found: error
+          retention-days: 30
+
+  unit-test-results:
+    name: unit-test-results
+    if: always()
+    runs-on: ubuntu-22.04
+    needs: [unit-tests]
+    steps:
+      - run: |
+          result="${{ needs.unit-tests.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All unit tests passed"
+          else
+            echo "One or more unit tests failed" >&2
+            exit 1
+          fi
