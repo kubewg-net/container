@@ -79,9 +79,9 @@ const (
 	DefaultMetricsIPV4Host = "127.0.0.1"
 	DefaultMetricsIPV6Host = "::1"
 	DefaultMetricsPort     = 8081
-	DefaultPprofIPV4Host   = "127.0.0.1"
-	DefaultPprofIPV6Host   = "::1"
-	DefaultPprofPort       = 6060
+	DefaultPProfIPV4Host   = "127.0.0.1"
+	DefaultPProfIPV6Host   = "::1"
+	DefaultPProfPort       = 6060
 )
 
 func RegisterFlags(cmd *cobra.Command) {
@@ -224,13 +224,13 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 		config.Metrics.Port = DefaultMetricsPort
 	}
 	if config.PProf.IPV4Host == "" {
-		config.PProf.IPV4Host = DefaultPprofIPV4Host
+		config.PProf.IPV4Host = DefaultPProfIPV4Host
 	}
 	if config.PProf.IPV6Host == "" {
-		config.PProf.IPV6Host = DefaultPprofIPV6Host
+		config.PProf.IPV6Host = DefaultPProfIPV6Host
 	}
 	if config.PProf.Port == 0 {
-		config.PProf.Port = DefaultPprofPort
+		config.PProf.Port = DefaultPProfPort
 	}
 
 	err = config.Validate()
