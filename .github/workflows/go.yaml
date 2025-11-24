@@ -12,7 +12,7 @@ concurrency:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -27,7 +27,7 @@ jobs:
           only-new-issues: true
 
   benchmark-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +65,7 @@ jobs:
   benchmark-results:
     name: benchmark-results
     if: always()
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [benchmark-tests]
     steps:
       - run: |
@@ -78,7 +78,7 @@ jobs:
           fi
 
   race-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -118,7 +118,7 @@ jobs:
   race-results:
     name: race-results
     if: always()
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [race-tests]
     steps:
       - run: |
@@ -131,7 +131,7 @@ jobs:
           fi
 
   unit-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -204,7 +204,7 @@ jobs:
   unit-test-results:
     name: unit-test-results
     if: always()
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [unit-tests]
     steps:
       - run: |
