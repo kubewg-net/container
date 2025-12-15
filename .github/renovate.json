@@ -6,8 +6,8 @@
     "customManagers": [
         {
             "customType": "regex",
-            "fileMatch": [
-                "(^|/)\\.github\\/workflows\\/go\\.yaml$"
+            "managerFilePatterns": [
+                "/(^|/)\\.github\\/workflows\\/go\\.yaml$/"
             ],
             "matchStrings": [
                 "# renovate: k8s: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\n\\s+- (?<currentValue>v\\d+\\.\\d+\\.\\d+)"
@@ -18,7 +18,7 @@
     "packageRules": [
         {
             "matchManagers": [
-                "regex"
+                "custom.regex"
             ],
             "matchUpdateTypes": [
                 "major",
